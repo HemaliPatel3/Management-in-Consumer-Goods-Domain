@@ -26,6 +26,9 @@ sort them in descending order of product counts. The final output contains
 2 fields, 
 segment 
 product_count */
+select   distinct(segment) , count(product)  from gdb023.dim_product
+group by segment  order by count(product) desc;
+
 
 
 
