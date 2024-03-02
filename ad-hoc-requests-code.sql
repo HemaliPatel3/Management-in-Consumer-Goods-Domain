@@ -38,7 +38,24 @@ segment
 product_count_2020 
 product_count_2021 
 difference */
-
+WITH unique_product AS
+(
+ SELECT
+      p.segment AS segment,
+      COUNT(DISTINCT
+          (CASE 
+              WHEN fiscal_year = 2020 THEN s.product_code END)) AS product_count_2020,
+       COUNT(DISTINCT
+          (CASE 
+              WHEN fiscal_year = 2021 THEN s.product_code END)) AS product_count_2021        
+ FROM fact_sales_monthly AS s
+ INNER JOIN dim_product AS p
+ ON s.product_code = p.product_code
+ GROUP BY p.segment
+)
+SELECT segment, product_count_2020, product_count_2021, (product_count_2021-product_count_2020) AS difference
+FROM unique_product
+ORDER BY difference DESC;
 
 
 /*5.  Get the products that have the highest and lowest manufacturing costs. 
