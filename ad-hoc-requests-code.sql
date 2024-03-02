@@ -80,6 +80,15 @@ Indian  market. The final output contains these fields,
 customer_code 
 customer 
 average_discount_percentage */
+select c.customer_code , c.customer , 
+CONCAT(ROUND(AVG(p.pre_invoice_discount_pct)*100,2),'%') AS average_discount_percentage
+from gdb023.dim_customer c
+join gdb023.fact_pre_invoice_deductions p on c.customer_code = p.customer_code
+WHERE market = 'India'
+AND fiscal_year = 2021
+GROUP BY customer, customer_code
+ORDER BY AVG(pre_invoice_discount_pct) DESC
+LIMIT 5;
 
 
 
