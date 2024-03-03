@@ -99,6 +99,19 @@ The final report contains these columns:
 Month 
 Year 
 Gross sales Amount */
+SELECT 
+       MONTHNAME(date) AS month_name,
+       YEAR(date) AS year_, 
+       CONCAT('$',ROUND(SUM(s.sold_quantity * g.gross_price)/1000000,2)) AS gross_sales_amount
+FROM fact_sales_monthly AS s
+INNER JOIN fact_gross_price AS g
+ON g.product_code = s.product_code
+AND g.fiscal_year = s.fiscal_year
+INNER JOIN dim_customer AS c
+ON c.customer_code = s.customer_code
+WHERE c.customer = 'Atliq Exclusive'
+GROUP BY month_name, year_
+ORDER BY year_;
 
 
 /*8.  In which quarter of 2020, got the maximum total_sold_quantity? The final 
