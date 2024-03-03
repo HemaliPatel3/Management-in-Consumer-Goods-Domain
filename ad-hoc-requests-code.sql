@@ -148,6 +148,22 @@ and the percentage of contribution?  The final output  contains these fields,
 channel 
 gross_sales_mln 
 percentage */
+WITH Output AS
+(
+SELECT C.channel,
+       ROUND(SUM(G.gross_price*S.sold_quantity/1000000), 2) AS Gross_sales_mln
+FROM gdb023.fact_sales_monthly S JOIN gdb023.dim_customer C ON S.customer_code = C.customer_code
+						   JOIN fact_gross_price G ON S.product_code = G.product_code
+WHERE S.fiscal_year = 2021
+GROUP BY channel
+)
+SELECT channel, CONCAT(Gross_sales_mln,' M') AS Gross_sales_mln , CONCAT(ROUND(Gross_sales_mln*100/total , 2), ' %') AS percentage
+FROM
+(
+(SELECT SUM(Gross_sales_mln) AS total FROM Output) A,
+(SELECT * FROM Output) B
+)
+ORDER BY percentage DESC ;
 
 
 
@@ -160,3 +176,21 @@ codebasics.io
 product 
 total_sold_quantity 
 rank_order */
+WITH Output1 AS 
+(
+SELECT P.division, FS.product_code, P.product, SUM(FS.sold_quantity) AS Total_sold_quantity
+FROM dim_product P JOIN fact_sales_monthly FS
+ON P.product_code = FS.product_code
+WHERE FS.fiscal_year = 2021 
+GROUP BY  FS.product_code, division, P.product
+),
+Output2 AS 
+(
+SELECT division, product_code, product, Total_sold_quantity,
+        RANK() OVER(PARTITION BY division ORDER BY Total_sold_quantity DESC) AS 'Rank_Order' 
+FROM Output1
+)
+ SELECT Output1.division, Output1.product_code, Output1.product, Output2.Total_sold_quantity, Output2.Rank_Order
+ FROM Output1 JOIN Output2
+ ON Output1.product_code = Output2.product_code
+WHERE Output2.Rank_Order IN (1,2,3);
