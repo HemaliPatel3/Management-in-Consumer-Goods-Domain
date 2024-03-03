@@ -118,6 +118,29 @@ ORDER BY year_;
 output contains these fields sorted by the total_sold_quantity, 
 Quarter 
 total_sold_quantity */
+WITH cte AS (
+    SELECT 
+        *,
+        CASE
+            WHEN MONTH(s.date) IN (9, 10, 11) THEN 'Q1'
+            WHEN MONTH(s.date) IN (12, 1, 2) THEN 'Q2'
+            WHEN MONTH(s.date) IN (3, 4, 5) THEN 'Q3'
+            ELSE 'Q4'
+        END AS Quarter
+    FROM 
+        fact_sales_monthly AS s
+    WHERE 
+        fiscal_year = 2020
+)
+SELECT 
+    Quarter,
+    SUM(sold_quantity) AS total_sold_quantity
+FROM 
+    cte
+GROUP BY 
+    Quarter
+ORDER BY 
+    total_sold_quantity DESC;
 
 
 /*9.  Which channel helped to bring more gross sales in the fiscal year 2021 
